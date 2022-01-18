@@ -13,16 +13,18 @@ class Carro(models.Model):
     marca = models.CharField(max_length=10)
     modelo = models.CharField(max_length=10)
 
+    def get_absolute_url(self):
+        return reverse('carros')
+
 class Vaga(models.Model):
     estacionamento = models.ForeignKey(Estacionamento,on_delete=models.RESTRICT, null=False)
     carro  = models.ForeignKey(Carro, on_delete=models.RESTRICT, null=True, blank=True)
-    ocupado = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse('vaga_details', args=[str(self.id)])
 
 class Ticket(models.Model):
-    horaDeEntrada = models.DateTimeField(null=False)
+    horaDeEntrada = models.DateTimeField(auto_now_add=True)
     horaDeSaida = models.DateTimeField(null=True, blank=True)
     placaVeiculo = models.CharField(max_length=8)
     valor = models.FloatField(null=True, blank=True)

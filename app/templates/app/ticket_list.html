@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if ticket_list %}
+
+            {% for ticket in ticket_list %} 
+                <ul>
+                    <li><strong>Placa do Veiculo: </strong>{{ ticket.placaVeiculo }} </li>
+                    <li><strong>Hora de entrada: </strong> {{ ticket.horaDeEntrada }} </li>
+                    <li><strong>Hora de saida: </strong> {{ ticket.horaDeSaida }} </li>
+                
+                    {% if ticket.valor > 0 %}
+                        <li><strong>Valor: </strong> {{ ticket.valor }} </li>
+                    {% endif%}
+
+                </ul class="mb-5">
+
+            {% endfor %}    
+    {% endif %}
+{% endblock %}  

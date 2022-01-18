@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if carro_list %}
+    <div class="container mb-5">
+        <div class="row">
+            {% for carro in carro_list %} 
+            <div class="col-sm-2 border-right border-primary mt-5">
+                <a class="btn-primary rounded p-1" href="{% url 'carro_update' carro.placa %}">Atualizar</a>
+                <a class="btn-primary rounded p-1 ml-4" href="{% url 'carro_delete' carro.pk %}">Excluir</a>
+                <img src="https://static.vecteezy.com/ti/vetor-gratis/p1/2726050-carro-veiculo-vista-de-topo-design-gr%C3%A1tis-vetor.jpg" width="150" height="auto">
+                {{ carro.placa}}<br>
+                {{ carro.marca}}<br>
+                {{ carro.modelo}}<br>
+            </div>
+            {% endfor %}    
+        </div>
+    </div> 
+    {% endif %}
+{% endblock %}  

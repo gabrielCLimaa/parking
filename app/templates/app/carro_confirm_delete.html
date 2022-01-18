@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Excluir carro</h1>
+
+<p>Tem certeza que quer excluir esse carro: <b> {{ carro.modelo}} com placa {{ carro.placa}} ?</b></p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" value="Sim, excluir.">
+</form>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h3 class="mt-4">Atualizar</h3>
+  <form action="" method="post" class="mt-2">
+    {% csrf_token %}
+    <table>
+    {{ form.as_table }}
+    </table>
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}
