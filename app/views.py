@@ -1,6 +1,12 @@
 from django.shortcuts import render
+from django.views import generic
+from .models import *
 
 # Create your views here.
 
 def index(request):
-    return render('AAA')
+    return render(request, 'index.html')
+
+class VagaListView(generic.ListView):
+    model = Vaga
+

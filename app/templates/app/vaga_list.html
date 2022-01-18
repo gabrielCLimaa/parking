@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if vaga_list %}
+    <div id="estacionamento" class="container">
+        <div class="row">
+            {% for vaga in vaga_list %}
+            <div class="col-sm-2 vaga">
+                {% if vaga.carro == none %}
+                        <a href="">
+                            <p>V - disponivel</p>
+                            <p>A - disponivel</p>
+                            <p>G - disponivel</p>
+                            <p>A - disponivel</p>
+                        </a>
+                    {% else %}
+                        <a href="">
+                            <img src="https://static.vecteezy.com/ti/vetor-gratis/p1/2726050-carro-veiculo-vista-de-topo-design-gr%C3%A1tis-vetor.jpg" width="150" height="auto">
+                        </a>
+                        {{ vaga.carro.placa}}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
