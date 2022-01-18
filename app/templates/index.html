@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    
+    <h1 >PARKING SYSTEM</h1>
+    <p>O estacionamento no momento possui os seguintes registros:</p>
+    <ul>
+        <li><strong>Vagas:</strong> {{vagas}} </li>
+        <li><strong>Carros:</strong> {{carros}} </li>
+        <li><strong>Tickets:</strong> {{tickets}} </li>
+    </ul>
 {% endblock %}
