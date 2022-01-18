@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Estacionamento: {{ vaga.estacionamento.nome }}</h1>
+    {% if vaga.carro != none %}
+        <p><strong>Placa: </strong>{{ vaga.carro.placa}}</a></p>
+        <p><strong>Marca: </strong>{{ vaga.carro.marca}}</a></p>
+        <p><strong>Modelo: </strong>{{ vaga.carro.modelo}}</a></p>
+    {% else %}
+        <p><strong>Ocupação:</strong> A vaga se encontra disponivel!!!</p>
+    {% endif %}
+    
+{% endblock %}

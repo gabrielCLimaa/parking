@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Excluir vaga</h1>
+
+<p>Tem certeza que quer excluir essa vaga ?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" value="Sim, excluir.">
+</form>
+
+{% endblock %}

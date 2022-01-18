@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views import generic
 from .models import *
 
@@ -20,3 +21,17 @@ def index(request):
 class VagaListView(generic.ListView):
     model = Vaga
 
+class VagaDetailView(generic.DetailView):
+    model = Vaga
+
+class VagaCreate(generic.CreateView):
+    model = Vaga
+    fields = '__all__'
+
+class VagaUpdate(generic.UpdateView):
+    model = Vaga
+    fields = '__all__'
+
+class VagaDelete(generic.DeleteView):
+    model = Vaga
+    success_url = reverse_lazy('vagas')
