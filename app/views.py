@@ -11,6 +11,7 @@ import datetime
 # Create your views here.
 VEICULO_JA_ESTACIONADO = -1
 VEICULO_PRONTO = 1
+NOT_EXIST = NULL
 
 @login_required
 def index(request):
@@ -28,61 +29,109 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
+@login_required
+@permission_required('app.vaga_perm')
+def VagaCriar(request):
+
+    if isToCreateOrUpdateObject(request):
+        form = VagaForm(request.POST)
+        if form.is_valid():
+            vaga = form.save(commit = False)
+            if carExistsInSpot(vaga):
+                if checarVagas(vaga.carro.placa) == VEICULO_JA_ESTACIONADO:
+                    return render(request, 'error/erro_vaga_criar.html')
+                TriggerCreateTicket(vaga.carro.placa)
+        vaga.save()
+        return redirect('vagas')
+    else:
+        form = VagaForm
+        return render(request, 'vaga_criar.html',{'form': form})
+
+@login_required
+@permission_required('app.vaga_perm')
+def VagaAtualizar(request,pk):
+    if isToCreateOrUpdateObject(request):
+        placaParaTicketDeSaida = getPreviewsCarIfExist(pk)
+
+        form = VagaForm(request.POST,instance=Vaga.objects.get(pk=pk))
+
+        if form.is_valid():
+            vaga = form.save(commit = False)
+
+            if placaParaTicketDeSaida != NOT_EXIST:
+                generateExitTicket(vaga, placaParaTicketDeSaida)
+            
+            if carExistsInSpot(vaga):
+                if checarVagas(vaga.carro.placa) == VEICULO_JA_ESTACIONADO:
+                    return render(request, 'error/erro_vaga_criar.html') 
+                TriggerCreateTicket(vaga.carro.placa)
+
+            vaga.save()
+            return redirect('tickets')
+    else:
+        form = VagaForm()
+        return render(request, 'vaga_atualizar.html',{'form': form})
+
+@login_required
+@permission_required('app.vaga_perm')
+def VagaDeletar(request,pk):
+    vaga = Vaga.objects.get(pk=pk)
+
+    if contemVeiculo(vaga):
+        return render(request, 'error/erro_vaga_deletar.html')
+    
+    vaga.delete()
+
+    return redirect('vagas')
+
 class VagaListView(generic.ListView):
     model = Vaga
 
 class VagaDetailView(generic.DetailView):
     model = Vaga
 
-@login_required
-@permission_required('app.vaga_perm')
-def VagaCriar(request):
+class CarroListView(generic.ListView):
+    model = Carro
+
+class CarroCreate(PermissionRequiredMixin,generic.CreateView):
+    permission_required = 'app.carro_perm'
+    model = Carro
+    fields = '__all__'
+
+class CarroUpdate(PermissionRequiredMixin,generic.UpdateView):
+    permission_required = 'app.carro_perm'
+    model = Carro
+    fields = '__all__'
+
+class CarroDelete(PermissionRequiredMixin,generic.DeleteView):
+    permission_required = 'app.carro_perm'
+    model = Carro
+    success_url = reverse_lazy('carros')
+
+class TicketListView(generic.ListView):
+    model = Ticket
+
+def getPreviewsCarIfExist(pk):
+    vaga = Vaga.objects.get(pk=pk)
+    plate = NOT_EXIST
+
+    if carExistsInSpot(vaga):
+        plate = vaga.carro.placa
+    return plate
+
+def isToCreateOrUpdateObject(request):
     if request.method == 'POST':
-        form = VagaForm(request.POST)
-        if form.is_valid():
-            vaga = form.save(commit=False)
+        return True
+    return False
 
-            if vaga.carro != None:
-                if vaga.carro.placa:
-                    if checarVagas(vaga.carro.placa) == VEICULO_JA_ESTACIONADO:
-                        return render(request, 'error/erro_vaga_criar.html')
-                    TriggerCreateTicket(str(vaga.carro.placa))
+def carExistsInSpot(vaga):
+    if vaga.carro != None:
+        return True
+    return False
 
-            vaga.save()
-            return redirect('vagas')
-
-    form = VagaForm
-    return render(request, 'vaga_criar.html',{'form': form})
-
-@login_required
-@permission_required('app.vaga_perm')
-def VagaAtualizar(request,pk):
-    if request.method == 'POST':
-        vaga = Vaga.objects.get(pk=pk)
- 
-        placaParaTicketDeSaida = NULL
-
-        if vaga.carro != None:
-            placaParaTicketDeSaida = vaga.carro.placa
-
-        form = VagaForm(request.POST, instance=vaga)
-        if form.is_valid():
-            vagaForm = form.save(commit = False)
-
-            if placaParaTicketDeSaida != NULL:
-                if vagaForm.carro == None:
-                    cacularTicket(timezone.now(), placaParaTicketDeSaida)
-
-            if vagaForm.carro != None:
-                if checarVagas(vagaForm.carro.placa) == VEICULO_JA_ESTACIONADO:
-                    return render(request, 'error/erro_vaga_criar.html')
-                TriggerCreateTicket(str(vagaForm.carro.placa))
-
-            vagaForm.save()
-            return redirect('tickets')
-
-    form = VagaForm()
-    return render(request, 'vaga_atualizar.html',{'form': form})
+def generateExitTicket(vaga,placa):
+    if not(carExistsInSpot(vaga)):
+        cacularTicket(timezone.now(), placa)
 
 def checarVagas(placa):
     carro = Carro.objects.get(placa=placa)
@@ -111,10 +160,10 @@ def calcularValor(horarioDaEstadia):
     if horarioDaEstadia < datetime.timedelta(hours=1):
         return 15
 
-    if horarioDaEstadia > datetime.timedelta(hours=1):
+    if horarioDaEstadia > datetime.timedelta(hours=1) and horarioDaEstadia <  datetime.timedelta(hours=3):
         return 25
 
-    if horarioDaEstadia > datetime.timedelta(hours=3):
+    if horarioDaEstadia > datetime.timedelta(hours=3) and horarioDaEstadia < datetime.timedelta(hours=6):
         return 45
 
     if horarioDaEstadia > datetime.timedelta(hours=6):
@@ -126,36 +175,3 @@ def contemVeiculo(vaga):
     else: 
         return True
 
-@login_required
-@permission_required('app.vaga_perm')
-def VagaDeletar(request,pk):
-    vaga = Vaga.objects.get(pk=pk)
-
-    if contemVeiculo(vaga):
-        return render(request, 'error/erro_vaga_deletar.html')
-    
-    vaga.delete()
-
-    
-    return redirect('vagas')
-
-class CarroListView(generic.ListView):
-    model = Carro
-
-class CarroCreate(PermissionRequiredMixin,generic.CreateView):
-    permission_required = 'app.carro_perm'
-    model = Carro
-    fields = '__all__'
-
-class CarroUpdate(PermissionRequiredMixin,generic.UpdateView):
-    permission_required = 'app.carro_perm'
-    model = Carro
-    fields = '__all__'
-
-class CarroDelete(PermissionRequiredMixin,generic.DeleteView):
-    permission_required = 'app.carro_perm'
-    model = Carro
-    success_url = reverse_lazy('carros')
-
-class TicketListView(generic.ListView):
-    model = Ticket
