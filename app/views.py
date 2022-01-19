@@ -1,7 +1,8 @@
-from django.shortcuts import render , redirect, get_object_or_404
+from django.shortcuts import render , redirect 
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views import generic
-from django.http import HttpResponse
 from .forms import *
 from .models import *
 from django.utils import timezone
@@ -11,6 +12,7 @@ import datetime
 VEICULO_JA_ESTACIONADO = -1
 VEICULO_PRONTO = 1
 
+@login_required
 def index(request):
     vagas = Vaga.objects.count()
     carros = Carro.objects.count()
@@ -32,6 +34,8 @@ class VagaListView(generic.ListView):
 class VagaDetailView(generic.DetailView):
     model = Vaga
 
+@login_required
+@permission_required('app.vaga_perm')
 def VagaCriar(request):
     if request.method == 'POST':
         form = VagaForm(request.POST)
@@ -40,6 +44,8 @@ def VagaCriar(request):
 
             if vaga.carro != None:
                 if vaga.carro.placa:
+                    if checarVagas(vaga.carro.placa) == VEICULO_JA_ESTACIONADO:
+                        return render(request, 'error/erro_vaga_criar.html')
                     TriggerCreateTicket(str(vaga.carro.placa))
 
             vaga.save()
@@ -48,6 +54,8 @@ def VagaCriar(request):
     form = VagaForm
     return render(request, 'vaga_criar.html',{'form': form})
 
+@login_required
+@permission_required('app.vaga_perm')
 def VagaAtualizar(request,pk):
     if request.method == 'POST':
         vaga = Vaga.objects.get(pk=pk)
@@ -118,6 +126,8 @@ def contemVeiculo(vaga):
     else: 
         return True
 
+@login_required
+@permission_required('app.vaga_perm')
 def VagaDeletar(request,pk):
     vaga = Vaga.objects.get(pk=pk)
 
@@ -126,20 +136,24 @@ def VagaDeletar(request,pk):
     
     vaga.delete()
 
-    return redirect('vagas')
     
+    return redirect('vagas')
+
 class CarroListView(generic.ListView):
     model = Carro
-    
-class CarroCreate(generic.CreateView):
+
+class CarroCreate(PermissionRequiredMixin,generic.CreateView):
+    permission_required = 'app.carro_perm'
     model = Carro
     fields = '__all__'
 
-class CarroUpdate(generic.UpdateView):
+class CarroUpdate(PermissionRequiredMixin,generic.UpdateView):
+    permission_required = 'app.carro_perm'
     model = Carro
     fields = '__all__'
 
-class CarroDelete(generic.DeleteView):
+class CarroDelete(PermissionRequiredMixin,generic.DeleteView):
+    permission_required = 'app.carro_perm'
     model = Carro
     success_url = reverse_lazy('carros')
 

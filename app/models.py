@@ -13,12 +13,18 @@ class Carro(models.Model):
     marca = models.CharField(max_length=10)
     modelo = models.CharField(max_length=10)
 
+    class Meta:
+        permissions = (("carro_perm", "Pode maniuplar a entidade carro"),)
+
     def get_absolute_url(self):
         return reverse('carros')
 
 class Vaga(models.Model):
     estacionamento = models.ForeignKey(Estacionamento,on_delete=models.RESTRICT, null=False)
     carro  = models.ForeignKey(Carro, on_delete=models.RESTRICT, null=True, blank=True)
+
+    class Meta:
+        permissions = (("vaga_perm", "Pode maniuplar a entidade vaga"),)
 
     def get_absolute_url(self):
         return reverse('vaga_details', args=[str(self.id)])

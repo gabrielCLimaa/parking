@@ -6,8 +6,10 @@
             {% for vaga in vaga_list %} 
             <div class="col-sm-2 vaga">
                 {% if vaga.carro == none %}
+                {% if user.is_authenticated and perms.vaga_perm %}
                 <a class="btn-primary rounded p-1" href="{% url 'vaga_update' vaga.id %}">Atualizar</a>
                 <a class="btn-primary rounded p-1 ml-4" href="{% url 'vaga_delete' vaga.pk %}">Excluir</a>
+                {% endif %}
                         <a href="{{ vaga.get_absolute_url  }}">
                             <p class="mt-2">V - disponivel</p>
                             <p>A - disponivel</p>
@@ -15,8 +17,10 @@
                             <p>A - disponivel</p>
                         </a>
                     {% else %}
+                    {% if user.is_authenticated and perms.vaga_perm %}
                     <a class="btn-primary rounded p-1" href="{% url 'vaga_update' vaga.id %}">Atualizar</a>
                     <a class="btn-primary rounded p-1 ml-4" href="{% url 'vaga_delete' vaga.pk %}">Excluir</a>
+                    {% endif %}
                         <a href="{{ vaga.get_absolute_url }}">
                             <img src="https://static.vecteezy.com/ti/vetor-gratis/p1/2726050-carro-veiculo-vista-de-topo-design-gr%C3%A1tis-vetor.jpg" width="150" height="auto">
                         </a>
