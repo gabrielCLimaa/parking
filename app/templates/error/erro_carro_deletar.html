@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h3>A CARRO NÃO PODE SER EXCLUIDO ENQUANTO ESTIVER EM UMA VAGA!!!</h3>
+  <a class="btn btn-primary mt-5" href="{% url 'carros' %}">
+    <h4>Voltar</h4>
+  </a>
+{% endblock %}

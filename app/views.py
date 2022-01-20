@@ -32,15 +32,17 @@ def index(request):
 @login_required
 @permission_required('app.vaga_perm')
 def VagaCriar(request):
-
     if isToCreateOrUpdateObject(request):
         form = VagaForm(request.POST)
+
         if form.is_valid():
             vaga = form.save(commit = False)
+
             if carExistsInSpot(vaga):
                 if checarVagas(vaga.carro.placa) == VEICULO_JA_ESTACIONADO:
                     return render(request, 'error/erro_vaga_criar.html')
                 TriggerCreateTicket(vaga.carro.placa)
+                
         vaga.save()
         return redirect('vagas')
     else:
@@ -84,6 +86,18 @@ def VagaDeletar(request,pk):
 
     return redirect('vagas')
 
+@login_required
+@permission_required('app.carro_perm')
+def CarroDeletar(request,pk):
+    carro = Carro.objects.get(pk=pk)
+
+    if checarVagas(carro.placa) == VEICULO_JA_ESTACIONADO:
+        return render(request, 'error/erro_carro_deletar.html')
+    
+    carro.delete()
+
+    return redirect('carros')
+
 class VagaListView(generic.ListView):
     model = Vaga
 
@@ -102,11 +116,6 @@ class CarroUpdate(PermissionRequiredMixin,generic.UpdateView):
     permission_required = 'app.carro_perm'
     model = Carro
     fields = '__all__'
-
-class CarroDelete(PermissionRequiredMixin,generic.DeleteView):
-    permission_required = 'app.carro_perm'
-    model = Carro
-    success_url = reverse_lazy('carros')
 
 class TicketListView(generic.ListView):
     model = Ticket
