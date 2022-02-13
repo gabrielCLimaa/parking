@@ -11,7 +11,7 @@ import datetime
 # Create your views here.
 VEICULO_JA_ESTACIONADO = -1
 VEICULO_PRONTO = 1
-NOT_EXIST = NULL
+NOT_EXIST = 0
 
 @login_required
 def index(request):
